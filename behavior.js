@@ -6,12 +6,12 @@ console.clear();
 
 let gl = null;
 let MGS_index = 0;
-
-// copied from ice 9
+let mars_y_rot = 0;
 let attr_vertex = null;
 let attr_normal = null;
 let uniform_color = null;
 let uniform_view = null;
+let uniform_props = null;
 let uniform_perspective = null;
 let uniform_light = null;
 let vertex_data = [];
@@ -20,6 +20,7 @@ let canvas = null;
 let program = null;
 let count = 2;
 let size = 3;
+
 
 // ----------------------------------------------
 // camera parameters
@@ -215,6 +216,7 @@ function configure() {
     uniform_view = gl.getUniformLocation( program, "V" );
     uniform_perspective = gl.getUniformLocation( program, "P" );
     uniform_light = gl.getUniformLocation( program, "light" ); 
+    uniform_props = gl.getUniformLocation( program, "props");
     
     gl.enable( gl.DEPTH_TEST );
 }
@@ -255,6 +257,8 @@ function draw() {
 }
 
 function drawMars() {
+    mars_y_rot = (mars_y_rot + 1) % 360
+    gl.uniform4f(uniform_props, 0, radians(mars_y_rot), 0, 1);
     gl.uniform4f( uniform_color, 0.75, 0.13, 0.13, 1.0 );
     gl.drawArrays( gl.TRIANGLES, 0, MGS_index );
 }
