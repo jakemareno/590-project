@@ -1,235 +1,136 @@
-//import { Vpl } from './data.js';
-//import { Vpp } from './data.js';
-//import { Fpl } from './data.js';
-//import { Fpp } from './data.js';
 console.clear();
 
 // ----------------------------------------------
-// Axis data (do not modify)
+// create variables used in your program
 // ----------------------------------------------
 
-let A = [
-    [0.0, 0.0, 0.0],
-    [1.0, 0.0, 0.0],
-    [0.0, 0.0, 0.0],
-    [0.0, 1.0, 0.0],
-    [0.0, 0.0, 0.0],
-    [0.0, 0.0, 1.0]
-];
 
-let plane_vert = Vpl;
-let prop_vert = Vpp;
-let plane_face = Fpl;
-let prop_face = Fpp;
 
 // ----------------------------------------------
-// end axis data
+// camera parameters
+// ----------------------------------------------
+let xt = 0.5;
+let yt = 0.5;
+let zt = 0.5;
+let fov = 45;
+
+// ----------------------------------------------
+// light parameters
+// ----------------------------------------------
+let lxt = 1.0;
+let lyt = 1.0;
+let lzt = 1.0;
+
+// ----------------------------------------------
+// orbit dynamic parameters
+// ----------------------------------------------
+let orbit_speed = 0;
+let orbit_speed_crd = 3; 
+let orbit_radius_crd = 0.65; 
+let orbit_angle_crd = 45; 
+
+// ----------------------------------------------
+// camera orientation parameters
+// ----------------------------------------------
+let at = vec3(0.0, 0.0, 0.0);
+let up = vec3(0.0, 1.0, 0.0);
+
+
+// ----------------------------------------------
+// Event listeners
 // ----------------------------------------------
 
-// ----------------------------------------------
-// Simuation control (do not modify)
-// ----------------------------------------------
+// listener for the orbit speed slider
+document.getElementById("os").addEventListener("input", function (e) {
+    orbit_speed_crd = parseFloat(document.getElementById("os").value);
+    document.getElementById("os_crd").innerHTML = " = " + orbit_speed_crd;
+});
 
-let xang = 0;
-let yang = 0;
-let zang = 0;
-let rot = 0;
-let axisRotation = null;
-let rot_inc = 10;
+// listener for the orbit distance slider
+document.getElementById("od").addEventListener("input", function (e) {
+    orbit_radius_crd = parseFloat(e.target.value);
+    document.getElementById("od_crd").innerHTML = " = " + orbit_radius_crd;
+});
 
-function startRotation(rotationFunc) {
-    if (axisRotation !== null) clearInterval(axisRotation);
-    axisRotation = setInterval(rotationFunc, 100);
-}
+// listener for the orbit angle slider
+document.getElementById("oa").addEventListener("input", function (e) {
+    orbit_angle_crd = parseFloat(document.getElementById("oa").value);
+    document.getElementById("oa_crd").innerHTML = " = " + orbit_angle_crd;
+});
 
-function stopRotation() {
-    clearInterval(axisRotation);
-    axisRotation = null;
-}
+document.getElementById("zt").addEventListener("click", function (e) {
+    zt = document.getElementById("zt").value;
+    document.getElementById("z_crd").innerHTML = "= " + zt;
+});
 
-document.addEventListener('mouseup', stopRotation);
+document.getElementById("xt").addEventListener("click", function (e) {
+    xt = document.getElementById("xt").value;
+    document.getElementById("x_crd").innerHTML = "= " + xt;
+});
 
-document.addEventListener('mousedown', function (event) {
-    switch ( event.target.id ) {
-        case "pitch-up":
-            startRotation(() => { xang = ( xang + rot_inc ) % 360; });
-            break;
-        case "pitch-down":
-            startRotation(() => { xang = ( xang - rot_inc ) % 360; });
-            break;
-        case "roll-left":
-            startRotation(() => { zang = ( zang + rot_inc ) % 360; });
-            break;
-        case "roll-right":
-            startRotation(() => { zang = ( zang - rot_inc ) % 360; });
-            break;
-        case "yaw-left":
-            startRotation(() => { yang = ( yang + rot_inc ) % 360; });
-            break;
-        case "yaw-right":
-            startRotation(() => { yang = ( yang - rot_inc ) % 360; });
-            break;
-        case "reset":
-            xang = yang = zang = 0; 
-            break;
-        default:
-            stopRotation();
-    }
+document.getElementById("yt").addEventListener("click", function (e) {
+    yt = document.getElementById("yt").value;
+    document.getElementById("y_crd").innerHTML = "= " + yt;
+});
+document.getElementById("fov").addEventListener("click", function (e) {
+    fov = document.getElementById("fov").value;
+    document.getElementById("fovy").innerHTML = "= " + fov;
+});
+
+document.getElementById("lzt").addEventListener("click", function (e) {
+    lzt = document.getElementById("lzt").value;
+    document.getElementById("lz_crd").innerHTML = "= " + lzt;
+});
+
+document.getElementById("lxt").addEventListener("click", function (e) {
+    lxt = document.getElementById("lxt").value;
+    document.getElementById("lx_crd").innerHTML = "= " + lxt;
+});
+
+document.getElementById("lyt").addEventListener("click", function (e) {
+    lyt = document.getElementById("lyt").value;
+    document.getElementById("ly_crd").innerHTML = "= " + lyt;
+});
+
+document.getElementById("reset_cl").addEventListener("click", function (e) {
+    xt = yt = zt = 0.5;
+    lxt = lyt = lzt = 1.0;
+    fov = 45;
+    document.getElementById("xt").value = xt;
+    document.getElementById("x_crd").innerHTML = "= " + xt;
+    document.getElementById("yt").value = yt;
+    document.getElementById("y_crd").innerHTML = "= " + yt;
+    document.getElementById("zt").value = zt;
+    document.getElementById("z_crd").innerHTML = "= " + zt;
+    document.getElementById("fov").value = fov;
+    document.getElementById("fovy").innerHTML = "= " + fov;
+    document.getElementById("lxt").value = lxt;
+    document.getElementById("lx_crd").innerHTML = "= " + lxt;
+    document.getElementById("lyt").value = lyt;
+    document.getElementById("ly_crd").innerHTML = "= " + lyt;
+    document.getElementById("lzt").value = lzt;
+    document.getElementById("lz_crd").innerHTML = "= " + lzt;
+});
+
+document.getElementById("reset_ss").addEventListener("click", function (e) {
+    orbit_speed_crd = 3; 
+    orbit_radius_crd = 0.65; 
+    orbit_angle_crd = 45; 
+    document.getElementById("os").value = orbit_speed_crd;
+    document.getElementById("os_crd").innerHTML = " = " + orbit_speed_crd;
+    document.getElementById("od").value = orbit_radius_crd;
+    document.getElementById("od_crd").innerHTML = " = " + orbit_radius_crd;
+    document.getElementById("oa").value = orbit_angle_crd;
+    document.getElementById("oa_crd").innerHTML = " = " + orbit_angle_crd;
+    draw();
 });
 
 // ----------------------------------------------
-// End simuation control
+// Add your coding solution
 // ----------------------------------------------
 
-let canvases = [];          // Store all 4 canvases
-let contextInfo = [];       // Store WebGL context info for each canvas
-let vertex_data = [];       // All vertices for plane, prop, and axes
-let size = 3;               // We are rendering with triangles
-let axis_index = 0;         // Will store the length of plane + prop vertices
-let prop_offset = -0.37;    // Used to put propeller at front of plane
 
-function createVertexData() {
-    
-    let row = 0;
 
-    // add plane vertices + faces to vertex.data
-    for ( let i=0; i<Fpl.length; i++ ) {
-        vertex_data[row++] = Vpl[ Fpl[i][0] ];
-        vertex_data[row++] = Vpl[ Fpl[i][1] ];
-        vertex_data[row++] = Vpl[ Fpl[i][2] ];
-    }
 
-    // add propeller vertices + faces to vertex.data
-    for ( let i=0; i<Fpp.length; i++ ) {
-        vertex_data[row++] = Vpp[ Fpp[i][0] ];
-        vertex_data[row++] = Vpp[ Fpp[i][1] ];
-        vertex_data[row++] = Vpp[ Fpp[i][2] ];
-    }
 
-    // create axes
-    axis_index = vertex_data.length;
-    
-    for ( let i=0; i<A.length; i++ ) {
-         vertex_data[row++] = A[i];
-    }
 
-}
-
-function configure() {
-    // Get each canvas
-    canvases.push(document.getElementById("xyz"));
-    canvases.push(document.getElementById("xz"));
-    canvases.push(document.getElementById("yz"));
-    canvases.push(document.getElementById("xy"));
-
-    // For each canvas, setup WebGL context info
-    for(let canvas of canvases) {
-        let gl = canvas.getContext("webgl");
-        let program = initShaders(gl, "vertex-shader", "fragment-shader");
-
-        gl.useProgram(program);
-        gl.viewport(0, 0, canvas.width, canvas.height);
-        gl.enable(gl.DEPTH_TEST);
-    
-        // Store context information
-        contextInfo.push({
-            gl: gl,
-            program: program,
-            attr_vertex: gl.getAttribLocation(program, "vertex"),
-            uniform_props: gl.getUniformLocation(program, "props"),
-            uniform_color: gl.getUniformLocation(program, "color"),
-            uniform_z_translation: gl.getUniformLocation(program, "z_translation")
-        });
-    }    
-
-}
-
-function allocateMemory() {
-    for (let info of contextInfo) {
-        let gl = info.gl;
-        let buffer_id = gl.createBuffer();
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer_id);
-        gl.vertexAttribPointer(info.attr_vertex, size, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(info.attr_vertex);
-        gl.bufferData(gl.ARRAY_BUFFER, flatten(vertex_data), gl.STATIC_DRAW);
-    }
-}
-
-function draw() {
-    
-    // XYZ 
-    drawPlane(contextInfo[0], xang, yang, zang);
-
-    // XZ - yaw
-    drawPlane(contextInfo[1], -90, yang, 0);
-
-    // YZ - pitch
-    drawPlane(contextInfo[2], xang, 0, 0);
-
-    // XY - roll 
-    drawPlane(contextInfo[3], 0, -90, zang);
-
-}
-
-function drawPlane(info, xAngle, yAngle, zAngle) {
-    let gl = info.gl;
-
-    gl.uniform4f(info.uniform_props,
-        xAngle * Math.PI/180,
-        yAngle * Math.PI/180,
-        zAngle * Math.PI/180,
-        1.75);
-
-    // Draw wireframe for plane
-    gl.uniform4f(info.uniform_color, 0.5, 0.5, 0.5, 1);
-    for (let j = 0; j < plane_face.length * 3; j += 3) {
-        gl.drawArrays(gl.LINE_STRIP, j, size);
-    }
-
-    // Offset for propeller
-    gl.uniform1f(info.uniform_z_translation, prop_offset);
-    gl.uniform4f(info.uniform_props,
-        xAngle * Math.PI/180,
-        yAngle * Math.PI/180,
-        (zAngle+rot) * Math.PI/180,
-        1.75);
-
-    // Draw propeller wireframe
-    for (let j = plane_face.length * 3; j < axis_index; j += 3) {
-        gl.drawArrays(gl.LINE_STRIP, j, size);
-    }
-
-    // Draw propeller triangles
-    gl.uniform4f(info.uniform_color, 0.81, 0.81, 0.81, 1.0);
-    gl.drawArrays(gl.TRIANGLES, plane_face.length * 3, prop_face.length * 3);
-
-    // Reset to default view
-    gl.uniform1f(info.uniform_z_translation, 0);
-    gl.uniform4f(info.uniform_props,
-        xAngle * Math.PI/180,
-        yAngle * Math.PI/180,
-        zAngle * Math.PI/180,
-        1.75);
-
-    // Draw triangles for plane
-    gl.drawArrays(gl.TRIANGLES, 0, plane_face.length * 3);
-
-    // Draw axes
-    gl.uniform4f(info.uniform_color, 1.0, 0.0, 0.0, 1.0); // Red
-    gl.drawArrays(gl.LINES, axis_index, 2);
-
-    gl.uniform4f(info.uniform_color, 0.0, 1.0, 0.0, 1.0);  // Green
-    gl.drawArrays(gl.LINES, axis_index + 2, 2);
-
-    gl.uniform4f(info.uniform_color, 0.0, 0.0, 1.0, 1.0);  // Blue
-    gl.drawArrays(gl.LINES, axis_index + 4, 2);
-
-    rot = ( rot + rot_inc ) % 360
-}
-
-// Run all functions
-createVertexData();
-configure();
-allocateMemory();
-setInterval(draw, 100);
