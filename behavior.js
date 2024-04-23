@@ -4,7 +4,22 @@ console.clear();
 // create variables used in your program
 // ----------------------------------------------
 
+let gl = null;
+let MGS_index = 0;
 
+// copied from ice 9
+let attr_vertex = null;
+let attr_normal = null;
+let uniform_color = null;
+let uniform_view = null;
+let uniform_perspective = null;
+let uniform_light = null;
+let vertex_data = [];
+let normal_data = [];
+let canvas = null;
+let program = null;
+let count = 2;
+let size = 3;
 
 // ----------------------------------------------
 // camera parameters
@@ -130,7 +145,138 @@ document.getElementById("reset_ss").addEventListener("click", function (e) {
 // ----------------------------------------------
 
 
+function createVertexData() {
+    let row = 0;
+    
+    for ( let i=0; i<F_p.length; i++ ) {
+        
+        vertex_data[row++] = V_p[ F_p[i][0] ];
+        vertex_data[row++] = V_p[ F_p[i][1] ];
+        vertex_data[row++] = V_p[ F_p[i][2] ];
+        
+    }
+    
+    MGS_index = vertex_data.length;
+    
+    for ( let i=0; i<F_s.length; i++ ) {
+        vertex_data[row++] = V_s[ F_s[i][0] ];
+        vertex_data[row++] = V_s[ F_s[i][1] ];
+        vertex_data[row++] = V_s[ F_s[i][2] ];
+    }
+}
+
+function createNormalData() {
+    let row = 0;
+    
+    for (let i = 0; i < F_p.length; i++){
+        let p1 = V_p[ F_p[i][0] ];
+        let p2 = V_p[ F_p[i][1] ];
+        let p3 = V_p[ F_p[i][2] ];
+        let v1 = subtract(p2, p1);
+        let v2 = subtract(p3, p1);
+        
+        let crossProd = cross(v1,v2);
+        let normalVector = normalize(crossProd);
+        
+        normal_data[row++] = normalVector;
+        normal_data[row++] = normalVector;
+        normal_data[row++] = normalVector;
+    }
+    
+    for (let i = 0; i < F_s.length; i++){
+        p1 = V_s[ F_s[i][0] ];
+        p2 = V_s[ F_s[i][1] ];
+        p3 = V_s[ F_s[i][2] ];
+        v1 = subtract(p2, p1);
+        v2 = subtract(p3, p1);
+        
+        crossProd = cross(v1,v2);
+        normalVector = normalize(crossProd);
+        
+        normal_data[row++] = normalVector;
+        normal_data[row++] = normalVector;
+        normal_data[row++] = normalVector;
+    }
+}
+
+function configure() {
+    canvas = document.getElementById("webgl-canvas");
+    gl = canvas.getContext("webgl");
+    
+    program = initShaders( gl, "vertex-shader", "fragment-shader" );
+    gl.useProgram( program );
+    
+    gl.viewport( 0, 0, canvas.width, canvas.height );
+    
+    attr_vertex = gl.getAttribLocation( program, "vertex" );
+    attr_normal = gl.getAttribLocation( program, "normal" );
+    
+    uniform_color = gl.getUniformLocation( program, "color" );
+    uniform_view = gl.getUniformLocation( program, "V" );
+    uniform_perspective = gl.getUniformLocation( program, "P" );
+    uniform_light = gl.getUniformLocation( program, "light" ); 
+    
+    gl.enable( gl.DEPTH_TEST );
+}
+
+function allocateMemory() {
+    let vertex_id = gl.createBuffer();
+    
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertex_id);
+    gl.vertexAttribPointer(attr_vertex, size, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(attr_vertex);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(vertex_data), gl.STATIC_DRAW);
+    
+    let normal_id = gl.createBuffer();
+    
+    gl.bindBuffer(gl.ARRAY_BUFFER, normal_id);
+    gl.vertexAttribPointer(attr_normal, size, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(attr_normal);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(normal_data), gl.STATIC_DRAW);
+}
+
+function draw() {
+    //lightVector = vec4(lxt, lyt, lzt, 0);
+    //let perspectiveMatrix = perspective(fov, 1.0, 0.3, 3.0);
+    
+    
+    let eye = vec3( xt, yt, zt);
+    let V = lookAt( eye, at, up );
+    let P = perspective( fov, 1.0, 0.3, 3.0 );
+    
+    gl.uniformMatrix4fv( uniform_view, false, flatten( V ) );
+    gl.uniformMatrix4fv( uniform_perspective, false, flatten( P ) );
+    
+    
+    drawMars();
+    drawMGS();
+    
+    console.log("Drawing");
+}
+
+function drawMars() {
+    gl.uniform4f( uniform_color, 0.75, 0.13, 0.13, 1.0 );
+    gl.drawArrays( gl.TRIANGLES, 0, MGS_index );
+}
+
+function drawMGS() {
+    
+}
+
+/*
+
+create the data (including normals), 
+context configuration,
+memory allocation, and buffering,
+set the camera, light, and shading parameters,
+transform and draw the model(s), and
+animation (i.e., draw at timed intervals)
+
+*/
 
 
-
-
+createVertexData();
+createNormalData();
+configure();
+allocateMemory();
+setInterval(draw, 100);
