@@ -7,6 +7,7 @@ console.clear();
 let gl = null;
 let MGS_index = 0;
 let mars_y_rot = 0;
+let mgs_y_rot = 0;
 let attr_vertex = null;
 let attr_normal = null;
 let uniform_color = null;
@@ -14,6 +15,7 @@ let uniform_view = null;
 let uniform_props = null;
 let uniform_perspective = null;
 let uniform_light = null;
+let uniform_eye = null;
 let vertex_data = [];
 let normal_data = [];
 let canvas = null;
@@ -21,6 +23,7 @@ let program = null;
 let count = 2;
 let size = 3;
 
+let uniform_trans = null;
 
 // ----------------------------------------------
 // camera parameters
@@ -185,14 +188,14 @@ function createNormalData() {
     }
     
     for (let i = 0; i < F_s.length; i++){
-        p1 = V_s[ F_s[i][0] ];
-        p2 = V_s[ F_s[i][1] ];
-        p3 = V_s[ F_s[i][2] ];
-        v1 = subtract(p2, p1);
-        v2 = subtract(p3, p1);
+        let p1 = V_s[ F_s[i][0] ];
+        let p2 = V_s[ F_s[i][1] ];
+        let p3 = V_s[ F_s[i][2] ];
+        let v1 = subtract(p2, p1);
+        let v2 = subtract(p3, p1);
         
-        crossProd = cross(v1,v2);
-        normalVector = normalize(crossProd);
+        let crossProd = cross(v1,v2);
+        let normalVector = normalize(crossProd);
         
         normal_data[row++] = normalVector;
         normal_data[row++] = normalVector;
@@ -218,6 +221,10 @@ function configure() {
     uniform_light = gl.getUniformLocation( program, "light" ); 
     uniform_props = gl.getUniformLocation( program, "props");
     
+    uniform_trans = gl.getUniformLocation(program, "trans");
+    
+    uniform_eye = gl.getUniformLocation(program, "eye");
+    
     gl.enable( gl.DEPTH_TEST );
 }
 
@@ -238,10 +245,6 @@ function allocateMemory() {
 }
 
 function draw() {
-    //lightVector = vec4(lxt, lyt, lzt, 0);
-    //let perspectiveMatrix = perspective(fov, 1.0, 0.3, 3.0);
-    
-    
     let eye = vec3( xt, yt, zt);
     let V = lookAt( eye, at, up );
     let P = perspective( fov, 1.0, 0.3, 3.0 );
@@ -249,22 +252,38 @@ function draw() {
     gl.uniformMatrix4fv( uniform_view, false, flatten( V ) );
     gl.uniformMatrix4fv( uniform_perspective, false, flatten( P ) );
     
+    let light_position = vec4(lxt, lyt, lzt, 0);
+    gl.uniform4fv(uniform_light, flatten(light_position));
     
     drawMars();
     drawMGS();
-    
-    console.log("Drawing");
 }
 
 function drawMars() {
-    mars_y_rot = (mars_y_rot + 1) % 360
+		mars_y_rot = (mars_y_rot + 1) % 360;
+    
+    gl.uniform4f(uniform_trans, 0, 0, 0, 1.0);
+    
     gl.uniform4f(uniform_props, 0, radians(mars_y_rot), 0, 1);
-    gl.uniform4f( uniform_color, 0.75, 0.13, 0.13, 1.0 );
-    gl.drawArrays( gl.TRIANGLES, 0, MGS_index );
+    gl.uniform4f(uniform_color, 0.75, 0.13, 0.13, 1.0 );
+    gl.drawArrays(gl.TRIANGLES, 0, MGS_index);
 }
 
-function drawMGS() {
-    
+function drawMGS() {  
+   	mgs_y_rot = (mgs_y_rot + 2) % 360;
+    orbit_speed = (orbit_speed + orbit_speed_crd) % 360;
+
+    let theta = radians(orbit_speed);
+    let phi = radians(orbit_angle_crd);
+    let x = orbit_radius_crd * Math.sin(theta) * Math.cos(phi);
+    let y = orbit_radius_crd * Math.sin(theta) * Math.sin(phi);
+    let z = Math.cos(theta);
+    gl.uniform4f(uniform_trans, x, y, z, 1.0);
+
+    gl.uniform4f(uniform_props, 0, radians(mgs_y_rot), 0, 0.3);
+    gl.uniform4f(uniform_color, 1.0, 0.84, 0.0, 1.0);
+
+    gl.drawArrays(gl.TRIANGLES, MGS_index, vertex_data.length - MGS_index);
 }
 
 /*
