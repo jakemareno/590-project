@@ -249,6 +249,7 @@ function draw() {
     let V = lookAt( eye, at, up );
     let P = perspective( fov, 1.0, 0.3, 3.0 );
     
+    gl.uniform4f(uniform_eye, xt, yt, zt, 0); 
     gl.uniformMatrix4fv( uniform_view, false, flatten( V ) );
     gl.uniformMatrix4fv( uniform_perspective, false, flatten( P ) );
     
