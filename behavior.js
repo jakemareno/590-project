@@ -252,20 +252,20 @@ function draw() {
     gl.uniformMatrix4fv( uniform_view, false, flatten( V ) );
     gl.uniformMatrix4fv( uniform_perspective, false, flatten( P ) );
     
-    let light_position = vec4(lxt, lyt, lzt, 0);
-    gl.uniform4fv(uniform_light, flatten(light_position));
+    let light = vec4(lxt, lyt, lzt, 0);
+    gl.uniform4fv(uniform_light, light);
     
     drawMars();
     drawMGS();
 }
 
 function drawMars() {
-		mars_y_rot = (mars_y_rot + 1) % 360;
+	mars_y_rot = (mars_y_rot + 1) % 360;
     
     gl.uniform4f(uniform_trans, 0, 0, 0, 1.0);
     
     gl.uniform4f(uniform_props, 0, radians(mars_y_rot), 0, 1);
-    gl.uniform4f(uniform_color, 0.75, 0.13, 0.13, 1.0 );
+    gl.uniform4f(uniform_color, 0.70, 0.13, 0.13, 1.0 );
     gl.drawArrays(gl.TRIANGLES, 0, MGS_index);
 }
 
