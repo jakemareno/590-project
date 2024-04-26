@@ -277,7 +277,7 @@ function drawMGS() {
     let phi = radians(orbit_angle_crd);
     let x = orbit_radius_crd * Math.sin(theta) * Math.cos(phi);
     let y = orbit_radius_crd * Math.sin(theta) * Math.sin(phi);
-    let z = Math.cos(theta);
+    let z = orbit_radius_crd * Math.cos(theta);
     gl.uniform4f(uniform_trans, x, y, z, 1.0);
 
     gl.uniform4f(uniform_props, 0, radians(mgs_y_rot), 0, 0.3);
